@@ -161,3 +161,24 @@ SELECT
 FROM worldlifexpectancy
 GROUP BY Country
 HAVING LifeExpectancyChange < 0;
+
+--Calculate the average year-over-year growth in life expectancy
+SELECT 
+    Year,
+    ROUND(AVG(Lifeexpectancy) - LAG(ROUND(AVG(Lifeexpectancy), 2)) OVER (ORDER BY Year), 2) AS AvgGrowth
+FROM worldlifexpectancy
+GROUP BY Year
+ORDER BY Year;
+
+-- Calculate the overall average year-over-year growth in life expectancy
+WITH YearlyGrowth AS (
+    SELECT 
+        Year,
+        ROUND(AVG(Lifeexpectancy) - LAG(AVG(Lifeexpectancy)) OVER (ORDER BY Year), 2) AS YearlyGrowth
+    FROM worldlifexpectancy
+    GROUP BY Year
+)
+SELECT 
+    CONCAT(ROUND(AVG(YearlyGrowth), 2) * 100, '%') AS OverallAvgGrowth
+FROM YearlyGrowth
+WHERE YearlyGrowth IS NOT NULL;
